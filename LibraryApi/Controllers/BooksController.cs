@@ -1,9 +1,10 @@
 ﻿using LibraryApi.Models;
+using LibraryApi.DTOs;
+using LibraryApi.Data;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using System.Data;
-using LibraryApi.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace LibraryApi.Controllers
 {
@@ -54,15 +55,20 @@ namespace LibraryApi.Controllers
         /// <summary>
         /// creates book with new id and given data
         /// </summary>
-        /// <param name="book">the book to create</param>
+        /// <param name="dto">the book to create</param>
         /// <response code="201">the book created</response>
         /// <response code="400">broken json</response>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Book>> Create(Book book)
+        public async Task<ActionResult<Book>> Create(CreateBookDto dto)
         {
-            book.Id = 0;
+            var book = new Book
+            {
+                Title = dto.Title,
+                Author = dto.Author,
+                Year = dto.Year
+            };
 
             _context.Books.Add(book);
             await _context.SaveChangesAsync();
@@ -74,7 +80,7 @@ namespace LibraryApi.Controllers
         /// updates book with new datas
         /// </summary>
         /// <param name="id">The id of the book to update</param>
-        /// <param name="updatedBook">the new book data</param>
+        /// <param name="dto">the new book data</param>
         /// <response code="204">book updated</response>
         /// <response code="400">broken json</response>
         /// <response code="404">no book with the given ID</response>
@@ -82,7 +88,7 @@ namespace LibraryApi.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> Update(int id, Book updatedBook)
+        public async Task<IActionResult> Update(int id, UpdateBookDto dto)
         {
             var book = await _context.Books.FindAsync(id);
 
@@ -91,9 +97,9 @@ namespace LibraryApi.Controllers
                 return NotFound();
             }
 
-            book.Title = updatedBook.Title;
-            book.Author = updatedBook.Author;
-            book.Year = updatedBook.Year;
+            book.Title = dto.Title;
+            book.Author = dto.Author;
+            book.Year = dto.Year;
 
             await _context.SaveChangesAsync();
 
